@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+
+dir=$(realpath "$(dirname $0)/..")
+
+cd $dir
+if [ -f .env ]; then
+  echo "The file .env already exist. Aborting"
+  exit 1
+else
+  cp -i .env.example .env &&
+  docker-compose pull &&
+  docker-compose run --rm sb-websocket pip install --user -r requirements.txt &&
+  docker-compose run --rm sb-aggregator pip install --user -r requirements.txt &&
+  docker-compose run --rm sb-sandbox pip install --user -r requirements.txt &&
+  docker-compose up -d influx1 &&
+  sleep 5 &&
+  docker-compose run --rm sb-aggregator python -m lib.db.setup &&
+  docker-compose run --rm sb-aggregator python -m lib.aggregator.setup &&
+  docker-compose down
+fi

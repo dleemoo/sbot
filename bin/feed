@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+olddir=$(pwd)
+dir=$(realpath "$(dirname $0)/..")
+cd $dir
+echo "python -m lib.client.app $1 $2" > tmp/.feed
+chmod +x tmp/.feed
+docker-compose run --rm sb-sandbox bash tmp/.feed
+rm tmp/.feed
+cd $olddir
