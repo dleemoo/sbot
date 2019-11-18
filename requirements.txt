@@ -1,0 +1,4 @@
+poloniex==0.0.17
+influxdb==5.2.3
+websockets==8.1
+schedule==0.6.0

@@ -1,0 +1,66 @@
+version: "3.7"
+
+services:
+  sb-aggregator:
+    image: $DOCKER_IMAGE
+    container_name: sb-aggregator
+    working_dir: /usr/src/app
+    command: python -m lib.aggregator.app
+    env_file:
+      - .env
+    volumes:
+      - .:/usr/src/app
+      - aggregator-root-home:/root
+    depends_on:
+      - influx1
+    tty: true
+    stdin_open: true
+
+  sb-websocket:
+    image: $DOCKER_IMAGE
+    container_name: sb-websocket
+    working_dir: /usr/src/app
+    command: python -m lib.websocket.app
+    env_file:
+      - .env
+    volumes:
+      - .:/usr/src/app
+      - websocket-root-home:/root
+    depends_on:
+      - influx1
+    tty: true
+    stdin_open: true
+
+  influx1:
+    image: $INFLUXDB_DOCKER_IMAGE
+    container_name: influx1
+    volumes:
+      - influx1-data:/var/lib/influxdb
+    environment:
+      - INFLUXDB_USER=$INFLUX_PASS
+      - INFLUXDB_USER_PASSWORD=$INFLUX_USER
+
+  sb-sandbox:
+    image: $DOCKER_IMAGE
+    container_name: sb-sandbox
+    working_dir: /usr/src/app
+    command: bash -c 'exit'
+    env_file:
+      - .env
+    volumes:
+      - .:/usr/src/app
+      - sandbox-root-home:/root
+    depends_on:
+      - sb-websocket
+    tty: true
+    stdin_open: true
+
+volumes:
+  aggregator-root-home:
+    name: sb-aggregator-root-home
+  websocket-root-home:
+    name: sb-websocket-root-home
+  sandbox-root-home:
+    name: sb-sandbox-root-home
+  influx1-data:
+    name: sb-influx1-data
